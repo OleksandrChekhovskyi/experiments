@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		<div>
+			<canvas id="canvas" width="128" height="128"></canvas>
+		</div>
+		<button id="button" type="button">Spawn More Overlords</button>
+		<script>
+			var canvas = document.getElementById("canvas");
+			var gl = canvas.getContext("webgl");
+
+			var t = 0.0;
+
+			function render() {
+				t += 0.05;
+
+				var v = Math.sin(t)*0.5 + 0.5;
+				gl.clearColor(v, 0.0, 1.0 - v, 1.0);
+				gl.clear(gl.COLOR_BUFFER_BIT);
+
+				requestAnimationFrame(render);
+			}
+
+			requestAnimationFrame(render);
+
+			var workerIndex = 0;
+
+			var button = document.getElementById("button");
+			button.addEventListener("click", function() {
+				for (var i = 0; i < 4; i++) {
+					var worker = new Worker("worker.js");
+
+					worker.postMessage({
+						index: workerIndex
+					});
+
+					worker.onmessage = function(e) {
+						document.body.insertAdjacentHTML("beforeend", "<div>Hello from worker " + e.data.index + "</div>");
+					};
+
+					workerIndex++;
+				}
+			});
+		</script>
+	</body>
+</html>
